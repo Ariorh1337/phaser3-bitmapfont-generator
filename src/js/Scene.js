@@ -9,7 +9,7 @@ export default class Main extends Phaser.Scene {
         });
     }
 
-    preload() {}
+    preload() { }
 
     create() {
         const btnGenerate = document.querySelector('#generate');
@@ -68,7 +68,7 @@ export default class Main extends Phaser.Scene {
             objArray.push(obj);
         });
 
-        this.symbols = this.add.container(0,0, objArray);
+        this.symbols = this.add.container(0, 0, objArray);
 
         let maxWidth = Math.max(...widthArray);
         let maxHeight = Math.max(...heightArray);
@@ -87,7 +87,7 @@ export default class Main extends Phaser.Scene {
         });
 
         objArray.forEach((obj) => {
-            obj.x = obj.x + (maxWidth/2) - (obj.width/2);
+            obj.x = obj.x + (maxWidth / 2) - (obj.width / 2);
         });
 
         const width = maxWidth * gridWidth;
@@ -182,7 +182,7 @@ export default class Main extends Phaser.Scene {
                 doubleQuotes: true
             }
         });
-    
+
         document.querySelector('#xmlMap').href = `data:text/xml;base64,${btoa(xml)}`;
 
         this.downloadCanvas({
@@ -190,12 +190,12 @@ export default class Main extends Phaser.Scene {
             fontFamily,
             fontSize,
             fontColor,
-        });       
+        });
     }
 
     downloadCanvas(data) {
         const { element, fontFamily, fontSize, fontColor } = data;
-        const { width, height } = this.symbols; 
+        const { width, height } = this.symbols;
 
         const key = `${fontFamily}_${fontSize}_${fontColor}_${new Date().getTime()}`;
         this.createTexture(this, key, this.symbols, width, height).then(() => {
@@ -220,17 +220,17 @@ export default class Main extends Phaser.Scene {
 
                 return resolve(key);
             }
-    
+
             const totalTexture = scene.add.renderTexture(0, 0, width, height);
-    
+
             totalTexture.draw(container);
-    
+
             totalTexture.snapshot((element) => {
                 const base64 = element.getAttribute("src");
                 scene.textures.addBase64(key, base64);
-    
+
                 totalTexture.destroy();
-    
+
                 setTimeout(() => {
                     resolve(key);
                 }, 100);
