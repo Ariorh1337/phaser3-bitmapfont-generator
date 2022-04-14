@@ -9,20 +9,111 @@ export default class Main extends Phaser.Scene {
         });
     }
 
-    preload() {
+    preload() {}
 
+    create() {
+        const btnGenerate = document.querySelector('#generate');
+        btnGenerate.addEventListener('click', () => {
+            const fontFamily = document.querySelector('#fontFamilyName').value;
+
+            this.loadFont(fontFamily);
+        });
+    }
+
+    loadFont(font) {
+        WebFont.load({
+            google: {
+                families: [font]
+            },
+            fontloading: () => {
+                this.clearScene();
+                this.initResize();
+            }
+        });
+    }
+
+    clearScene() {
+        if (this.symbols) this.symbols.destroy();
+    }
+
+    initResize() {
+        const fontText = document.querySelector('#fontText').value;
+        const fontFamily = document.querySelector('#fontFamilyName').value;
+        const fontSize = parseInt(document.querySelector('#fontSize').value);
+        const fontColor = document.querySelector('#fontColor').value;
+        const strokeSize = parseInt(document.querySelector('#strokeSize').value);
+        const strokeColor = document.querySelector('#strokeColor').value;
+
+        const charArray = fontText.split("");
+
+        /** @type {Phaser.GameObjects.Text[]} */
+        const objArray = [];
+        const widthArray = [];
+        const heightArray = [];
+
+        const style = {
+            fontFamily: fontFamily,
+            fontSize: fontSize + 'px',
+            color: fontColor,
+        };
+
+        if (strokeSize) style["strokeThickness"] = strokeSize;
+        if (strokeColor.length) style["stroke"] = strokeColor;
+
+        charArray.forEach((char) => {
+            const obj = this.add.text(0, 0, char, style);
+
+            widthArray.push(obj.width);
+            heightArray.push(obj.height);
+            objArray.push(obj);
+        });
+
+        this.symbols = this.add.container(0,0, objArray);
+
+        let maxWidth = Math.max(...widthArray);
+        let maxHeight = Math.max(...heightArray);
+
+        const gridWidth = 10;
+        const gridHeight = (charArray.length / gridWidth) + 1;
+
+        Phaser.Actions.GridAlign(objArray, {
+            width: gridWidth,
+            height: gridHeight,
+            cellWidth: maxWidth,
+            cellHeight: maxHeight,
+            position: Phaser.Display.Align.TOP_LEFT,
+            x: maxWidth / 2,
+            y: maxHeight / 2
+        });
+
+        objArray.forEach((obj) => {
+            obj.x = obj.x + (maxWidth/2) - (obj.width/2);
+        });
+
+        const width = maxWidth * gridWidth;
+        const height = maxHeight * gridHeight;
+
+        this.symbols.width = width;
+        this.symbols.height = height;
+
+        this.scene.scene.scale.once('resize', () => {
+            this.generateFont(maxWidth, maxHeight, objArray);
+        });
+
+        this.scale.resize(width, height);
     }
 
     generateFont(maxWidth, maxHeight, objArray) {
-
         // Generate Font
-        const fontFamily = document.querySelector('#fontFamily').value;
+        const fontFamily = document.querySelector('#fontFamilyName').value;
+
         const fontSize = parseInt(document.querySelector('#fontSize').value);
+        const fontColor = document.querySelector('#fontColor').value;
+        const strokeSize = parseInt(document.querySelector('#strokeSize').value);
 
         const charDataArr = [];
 
         objArray.forEach((obj) => {
-
             // Test Generate Data Array
             charDataArr.push({
                 "@": {
@@ -40,6 +131,7 @@ export default class Main extends Phaser.Scene {
                 }
             });
         });
+
         const xml = js2xmlparser.parse("font", {
             "info": {
                 "@": {
@@ -54,7 +146,7 @@ export default class Main extends Phaser.Scene {
                     "aa": "1",
                     "padding": "0,0,0,0",
                     "spacing": "0,0",
-                    "outline": "0"
+                    "outline": String(strokeSize)
                 }
             },
             "common": {
@@ -90,128 +182,59 @@ export default class Main extends Phaser.Scene {
                 doubleQuotes: true
             }
         });
-        console.log(xml);
+    
+        document.querySelector('#xmlMap').href = `data:text/xml;base64,${btoa(xml)}`;
 
-        this.dlCanvas(this.game.canvas, document.querySelector('#fontMap'));
+        this.downloadCanvas({
+            element: document.querySelector('#fontMap'),
+            fontFamily,
+            fontSize,
+            fontColor,
+        });       
+    }
+
+    downloadCanvas(data) {
+        const { element, fontFamily, fontSize, fontColor } = data;
+        const { width, height } = this.symbols; 
+
+        const key = `${fontFamily}_${fontSize}_${fontColor}_${new Date().getTime()}`;
+        this.createTexture(this, key, this.symbols, width, height).then(() => {
+            element.href = this.textures.getBase64(key);
+        });
     }
 
     /**
-     * From SO https://stackoverflow.com/questions/12796513/html5-canvas-to-png-file
+     * @param {Phaser.Scene} scene 
+     * @param {string} key 
+     * @param {Phaser.GameObjects.Container} container 
+     * @param {number} width 
+     * @param {number} height 
+     * @returns {Promise<string>}
      */
-    dlCanvas(canvas, a) {
-        let dt = canvas.toDataURL('image/png');
-        /* Change MIME type to trick the browser to downlaod the file instead of displaying it */
-        dt = dt.replace(/^data:image\/[^;]*/, 'data:application/octet-stream');
+    createTexture(scene, key, container, width, height) {
+        return new Promise((resolve) => {
+            if (scene.textures.get(key).key !== "__MISSING") {
+                console.debug(
+                    `createTexture was used more than once, texture: ${key}`
+                );
 
-        /* In addition to <a>'s "download" attribute, you can define HTTP-style headers */
-        dt = dt.replace(/^data:application\/octet-stream/, 'data:application/octet-stream;headers=Content-Disposition: attachment; filename=Canvas.png');
-
-        // a.download = document.querySelector('#fontFamily').value + '.png';
-        a.href = dt;
-    };
-
-
-    /*testFont() {
-        this.load.bitmapFont('test', require('../test.png'), require('../test.xml'));
-        this.load.once('complete', () => {
-            const text = this.add.bitmapText(100, 100, 'test', this.testString);
-            text.x = 200 - text.width/2;
-        });
-        this.load.start();
-    }*/
-
-    loadFont(font) {
-        WebFont.load({
-            google: {
-                families: [font]
-            },
-            fontloading: () => {
-                this.initResize();
+                return resolve(key);
             }
-        });
-
-    }
-
-
-    initResize() {
-
-        const fontFamily = document.querySelector('#fontFamily').value;
-        const fontSize = parseInt(document.querySelector('#fontSize').value);
-        const fontColor = document.querySelector('#fontColor').value;
-
-        const charArray = [];
-        const charString = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
-        for (let i = 0; i < charString.length; i += 1) {
-            charArray.push(charString[i]);
-        }
-
-        /**
-         *
-         * @type {Phaser.GameObjects.Text[]}
-         */
-        const objArray = [];
-        const widthArray = [];
-        const heightArray = [];
-        charArray.forEach((char) => {
-            const obj = this.add.text(0,0,char, {
-                fontFamily: fontFamily,
-                fontSize: fontSize + 'px',
-                color: fontColor
+    
+            const totalTexture = scene.add.renderTexture(0, 0, width, height);
+    
+            totalTexture.draw(container);
+    
+            totalTexture.snapshot((element) => {
+                const base64 = element.getAttribute("src");
+                scene.textures.addBase64(key, base64);
+    
+                totalTexture.destroy();
+    
+                setTimeout(() => {
+                    resolve(key);
+                }, 100);
             });
-            widthArray.push(obj.width);
-            heightArray.push(obj.height);
-            objArray.push(obj);
         });
-
-        let maxWidth = Math.max(...widthArray);
-        let maxHeight = Math.max(...heightArray);
-
-        const gridWidth = 10;
-        const gridHeight = 12;
-
-
-        Phaser.Actions.GridAlign(objArray, {
-            width: gridWidth,
-            height: gridHeight,
-            cellWidth: maxWidth,
-            cellHeight: maxHeight,
-            position: Phaser.Display.Align.TOP_LEFT,
-            x: maxWidth / 2,
-            y: maxHeight / 2
-        });
-
-        objArray.forEach((obj) => {
-            // Grid Lines
-            /*const cell =  this.add.graphics();
-            cell.lineStyle(1, 0x00ff00, 1);
-            cell.strokeRect(obj.x, obj.y, maxWidth, maxHeight);
-            container.add(cell);*/
-            obj.x = obj.x + (maxWidth/2) - (obj.width/2);
-        });
-
-        const width = maxWidth * gridWidth;
-        const height = maxHeight * gridHeight;
-        this.scene.scene.scale.once('resize', (gameSize,
-                                               baseSize,
-                                               displaySize,
-                                               resolution,
-                                               previousWidth,
-                                               previousHeight) => {
-            // this._bg.fillRect(0, 0, gameSize.width, gameSize.height);
-            this.generateFont(maxWidth, maxHeight, objArray);
-        });
-        this.scale.resize(width, height);
-    }
-
-    create() {
-        const btnGenerate = document.querySelector('#generate');
-        btnGenerate.addEventListener('click', () => {
-            const fontFamily = document.querySelector('#fontFamily').value;
-            this.loadFont(fontFamily);
-        });
-    }
-
-    update() {
-        // ok
     }
 }

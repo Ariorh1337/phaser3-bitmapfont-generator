@@ -5,14 +5,8 @@ import Main from './Scene';
 const gameConfig = {
     width: 512,
     height: 512,
-    type: Phaser.CANVAS,
+    type: Phaser.WEBGL,
     parent: 'phaser',
-    backgroundColor: {
-        r: 0,
-        g: 0,
-        b: 0,
-        a: 0
-    },
     transparent: true,
     scale: {
         mode: Phaser.Scale.NONE,
