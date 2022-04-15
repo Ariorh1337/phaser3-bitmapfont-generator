@@ -1,52 +1,52 @@
-const Path = require('path');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const settings = require("../package.json");
+
+const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-	entry: {
-		app: Path.resolve(__dirname, '../src/js/index.js')
-	},
+	entry: ["./src/scripts/game.ts"],
 	output: {
-		path: Path.resolve('./'),
-		filename: 'js/[name].js'
+		path: path.resolve(__dirname, '../dist'),
+		filename: '[name].bundle.js',
+		chunkFilename: '[name].chunk.js'
 	},
-	optimization: {
-		splitChunks: {
-			chunks: 'all',
-			name: false
-		}
-	},
-	plugins: [
-		new CleanWebpackPlugin(),
-		new CopyWebpackPlugin([
-			{ from: Path.resolve(__dirname, '../src'), to: 'public' }
-		]),
-		new HtmlWebpackPlugin({
-			template: Path.resolve(__dirname, '../src/index.html')
-		})
-	],
 	resolve: {
-		alias: {
-			'~': Path.resolve(__dirname, '../src')
-		}
+		extensions: ['.ts', '.tsx', '.js'],
+		modules: ["node_modules", "src"]
 	},
 	module: {
 		rules: [
 			{
-				test: /\.mjs$/,
-				include: /node_modules/,
-				type: 'javascript/auto'
-			},
-			{
-				test: /\.(ico|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2)(\?.*)?$/,
-				use: {
-					loader: 'file-loader',
-					options: {
-						name: '[path][name].[ext]'
-					}
-				}
-			},
+				test: /\.tsx?$|\.jsx?$/,
+				include: path.join(__dirname, '../src'),
+				loader: 'ts-loader'
+			}
 		]
-	}
-};
+	},
+	optimization: {
+		splitChunks: {
+			cacheGroups: {
+				commons: {
+					test: /[\\/]node_modules[\\/]/,
+					name: 'vendors',
+					chunks: 'all',
+					filename: '[name].bundle.js'
+				}
+			}
+		}
+	},
+	plugins: [
+		new HtmlWebpackPlugin({
+			version: settings.version,
+			template: 'src/index.html',
+		}),
+		new CopyWebpackPlugin({
+			patterns: [
+				{ from: 'src/assets', to: 'assets' },
+				{ from: 'src/css', to: 'css' },
+				{ from: 'src/favicon.ico', to: '' }
+			]
+		})
+	]
+}

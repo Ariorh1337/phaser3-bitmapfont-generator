@@ -1,13 +1,4 @@
-# dependencies
 node_modules
-
-# production
-build
-
-# misc
-.DS_Store
-
-npm-debug.log
-yarn-error.log
-yarn.lock
-.yarnclean
+dist
+.cache
+package-lock.json
