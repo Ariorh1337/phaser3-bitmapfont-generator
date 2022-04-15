@@ -7,7 +7,8 @@
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 	<script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
 	<title><%= htmlWebpackPlugin.options.version %> | Bitmap Font Generator</title>
-	<style src="./css/style.css"></style>
+	<base href="/">
+    <style src="./css/style.css"></style>
 </head>
 <body>
     <div class="p-3" id="app">
@@ -16,13 +17,13 @@
                 <div class="form-group row">
                     <label class="col-sm-2 col-form-label">Text</label>
                     <div class="col-sm-10">
-                        <input class="form-control" type="text" id="fontText" value=" !#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~" name="fontFamily">
+                        <input class="form-control" type="text" id="fontText" value=" !#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~" name="fontFamily">
                     </div>
                 </div>
                 <div class="form-group row">
                     <label class="col-sm-2 col-form-label">Font Family</label>
                     <div class="col-sm-10" style="display: flex;">
-                        <input class="form-control" type="text" id="fontFamilyName" value="Arial" style="width: 100%; height: 100%;">
+                        <input class="form-control" type="text" id="fontFamilyName" value="Bebas Neue" style="width: 100%; height: 100%;">
                         <input class="form-control" type="file" id="fontFamilyFile" value="" style="width: 60%;height: fit-content; display: none;">
                     </div>
                 </div>
@@ -54,11 +55,14 @@
         </fieldset>
         <fieldset id="result">
             <legend class="bg-light border-bottom">Result Preview</legend>
+            <div id="phaser" style="background: repeat-x, repeat-y, url(/assets/bg.jpg)"></div>
+        </fieldset>
+        <fieldset id="download">
+            <legend class="bg-light border-bottom">Download</legend>
             <div>
-                <a id="fontMap" download="font.png">Download PNG</a>
-                <a id="xmlMap" download="font.xml">Download XML</a>
+                <button id="loadPNG" class="btn btn-secondary">PNG</button>
+                <button id="loadXML" class="btn btn-secondary">XML</button>
             </div>
-            <div id="phaser" style="background: repeat-x, repeat-y, url(public/assets/bg.jpg)"></div>
         </fieldset>
     </div>
 </body>

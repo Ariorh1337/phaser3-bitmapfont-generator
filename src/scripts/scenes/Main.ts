@@ -1,13 +1,24 @@
-import * as js2xmlparser from "js2xmlparser";
 import WebFont from "webfontloader";
+import {
+    createTexture,
+    createXML,
+    downloadBlob,
+    downloadLink,
+} from "../util/extra";
 
 type InputElement = HTMLInputElement | HTMLTextAreaElement;
-
-const getInputValue = (id: string): InputElement => {
-    return document.querySelector(id)! as InputElement;
+const getInputValue = (id: string): string => {
+    return (document.querySelector(id)! as InputElement).value;
+};
+const getButton = (id: string): HTMLButtonElement => {
+    return document.querySelector(id)! as HTMLButtonElement;
 };
 
 export default class Main extends Phaser.Scene {
+    private filename?: string;
+    private dataXML?: string;
+    private dataPNG?: string;
+
     private symbols?: Phaser.GameObjects.Container;
 
     constructor() {
@@ -19,11 +30,18 @@ export default class Main extends Phaser.Scene {
     preload() {}
 
     create() {
-        const btnGenerate = document.querySelector("#generate")!;
-        btnGenerate.addEventListener("click", () => {
-            const fontFamily = getInputValue("#fontFamilyName");
+        const { generate, loadPNG, loadXML } = this.getInputs();
 
-            this.loadFont(fontFamily.value);
+        generate.addEventListener("click", () => {
+            this.loadFont(getInputValue("#fontFamilyName"));
+        });
+        loadPNG.addEventListener("click", () => {
+            if (!this.dataPNG || !this.filename) return;
+            downloadLink(this.dataPNG, `${this.filename}.png`, "image/png");
+        });
+        loadXML.addEventListener("click", () => {
+            if (!this.dataXML || !this.filename) return;
+            downloadBlob(this.dataXML, `${this.filename}.xml`, "text/xml");
         });
     }
 
@@ -32,9 +50,12 @@ export default class Main extends Phaser.Scene {
             google: {
                 families: [font],
             },
-            fontloading: () => {
+            fontactive: () => {
                 this.clearScene();
                 this.initResize();
+            },
+            fontinactive: () => {
+                alert("Font not found");
             },
         });
     }
@@ -44,14 +65,16 @@ export default class Main extends Phaser.Scene {
     }
 
     initResize() {
-        const fontText = getInputValue("#fontText").value;
-        const fontFamily = getInputValue("#fontFamilyName").value;
-        const fontSize = parseInt(getInputValue("#fontSize").value);
-        const fontColor = getInputValue("#fontColor").value;
-        const strokeSize = parseInt(getInputValue("#strokeSize").value);
-        const strokeColor = getInputValue("#strokeColor").value;
+        const {
+            fontText,
+            fontFamily,
+            fontSize,
+            fontColor,
+            strokeSize,
+            strokeColor,
+        } = this.getInputs();
 
-        const charArray = fontText.split("");
+        const charArray = [...new Set(fontText.split("")).keys()];
 
         const objArray = [] as Phaser.GameObjects.Text[];
         const widthArray = [] as number[];
@@ -103,154 +126,58 @@ export default class Main extends Phaser.Scene {
         this.symbols.height = height;
 
         this.scene.scene.scale.once("resize", () => {
-            this.generateFont(maxWidth, maxHeight, objArray);
+            this.generateFont(maxHeight, objArray);
         });
 
         this.scale.resize(width, height);
     }
 
-    generateFont(
-        maxWidth: number,
-        maxHeight: number,
-        objArray: Phaser.GameObjects.Text[]
-    ) {
-        // Generate Font
-        const fontFamily = getInputValue("#fontFamilyName").value;
+    generateFont(maxHeight: number, objArray: Phaser.GameObjects.Text[]) {
+        const filename = prompt("Enter filename", "font");
 
-        const fontSize = parseInt(getInputValue("#fontSize").value);
-        const fontColor = getInputValue("#fontColor").value;
-        const strokeSize = parseInt(getInputValue("#strokeSize").value);
+        const { fontFamily, fontSize, strokeSize } = this.getInputs();
 
-        const charDataArr = [] as any;
-
-        objArray.forEach((obj) => {
-            // Test Generate Data Array
-            charDataArr.push({
-                "@": {
-                    id: obj.text.charCodeAt(0),
-                    char: obj.text,
-                    x: obj.x,
-                    y: obj.y,
-                    width: obj.width,
-                    height: obj.height,
-                    xoffset: "0",
-                    yoffset: maxHeight - obj.height,
-                    xadvance: obj.width,
-                    page: "0",
-                    chnl: "15",
-                },
-            });
+        const xml = createXML({
+            filename: `${filename}.png`,
+            objArray,
+            maxHeight,
+            fontFamily,
+            fontSize,
+            strokeSize,
         });
 
-        const xml = js2xmlparser.parse(
-            "font",
-            {
-                info: {
-                    "@": {
-                        face: fontFamily,
-                        size: fontSize,
-                        bold: "0",
-                        italic: "0",
-                        charset: "",
-                        unicode: "1",
-                        stretchH: "100",
-                        smooth: "0",
-                        aa: "1",
-                        padding: "0,0,0,0",
-                        spacing: "0,0",
-                        outline: String(strokeSize),
-                    },
-                },
-                common: {
-                    "@": {
-                        lineHeight: maxHeight,
-                        base: maxHeight,
-                        scaleW: "512",
-                        scaleH: "512",
-                        pages: "1",
-                        packed: "0",
-                        alphaChnl: "0",
-                        redChnl: "4",
-                        greenChnl: "4",
-                        blueChnl: "4",
-                    },
-                },
-                pages: {
-                    pages: {
-                        "@": {
-                            id: "0",
-                            file: "font.png",
-                        },
-                    },
-                },
-                chars: {
-                    "@": {
-                        count: charDataArr.length,
-                    },
-                    char: charDataArr,
-                },
-            },
-            {
-                format: {
-                    doubleQuotes: true,
-                },
-            }
-        );
+        const key = `${filename}_${new Date().getTime()}`;
+        const { width, height } = this.symbols!;
 
-        (
-            document.querySelector("#xmlMap")! as HTMLLinkElement
-        ).href = `data:text/xml;base64,${btoa(xml)}`;
+        createTexture(this, key, this.symbols!, width, height).then((data) => {
+            this.filename = filename || "";
+            this.dataXML = xml;
+            this.dataPNG = data.base64;
+        });
+    }
 
-        this.downloadCanvas({
-            element: document.querySelector("#fontMap"),
+    getInputs() {
+        const fontText = getInputValue("#fontText");
+        const fontFamily = getInputValue("#fontFamilyName");
+        const fontSize = parseInt(getInputValue("#fontSize"));
+        const fontColor = getInputValue("#fontColor");
+        const strokeSize = parseInt(getInputValue("#strokeSize"));
+        const strokeColor = getInputValue("#strokeColor");
+
+        const generate = getButton("#generate");
+        const loadPNG = getButton("#loadPNG");
+        const loadXML = getButton("#loadXML");
+
+        return {
+            fontText,
             fontFamily,
             fontSize,
             fontColor,
-        });
-    }
-
-    downloadCanvas(data) {
-        const { element, fontFamily, fontSize, fontColor } = data;
-        const { width, height } = this.symbols!;
-
-        const key = `${fontFamily}_${fontSize}_${fontColor}_${new Date().getTime()}`;
-        this.createTexture(this, key, this.symbols!, width, height).then(() => {
-            element.href = this.textures.getBase64(key);
-        });
-    }
-
-    createTexture(
-        scene: Phaser.Scene,
-        key: string,
-        container: Phaser.GameObjects.Container,
-        width: number,
-        height: number
-    ): Promise<string> {
-        return new Promise((resolve) => {
-            if (scene.textures.get(key).key !== "__MISSING") {
-                console.debug(
-                    `createTexture was used more than once, texture: ${key}`
-                );
-
-                return resolve(key);
-            }
-
-            const totalTexture = scene.add.renderTexture(0, 0, width, height);
-
-            totalTexture.draw(container);
-
-            totalTexture.snapshot((element) => {
-                const base64 = (element as HTMLImageElement).getAttribute(
-                    "src"
-                );
-                scene.textures.addBase64(key, base64);
-
-                totalTexture.destroy();
-
-                setTimeout(() => {
-                    resolve(key);
-                }, 100);
-            });
-        });
+            strokeSize,
+            strokeColor,
+            generate,
+            loadPNG,
+            loadXML,
+        };
     }
 }
