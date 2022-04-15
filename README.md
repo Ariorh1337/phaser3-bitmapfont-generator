@@ -6,7 +6,6 @@ Note: This is still in progress but works for general cases. XML is logged to th
 
 ![Generator preview](https://i.imgur.com/bwoq9MB.png)
 
-
 ## Installation
 
 ```bash
@@ -16,11 +15,13 @@ npm install
 ## Run the app
 
 ```bash
-npm run start
+npm run local
 ```
 
 ## Contributing
+
 Pull requests are welcome.
 
-## License
-[MIT](https://choosealicense.com/licenses/mit/)
+## Try it out
+
+https://ariorh.com/tools/bitmap-gen/
