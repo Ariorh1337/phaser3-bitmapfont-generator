@@ -65,11 +65,26 @@ function gradientUI() {
         return line;
     }
 
-    document.querySelector("#gradientAdd")?.addEventListener("click", () => {
+    const getId = (id: string) => {
+        return document.querySelector(id) as any;
+    };
+
+    getId("#gradientAdd").addEventListener("click", () => {
         const line = createLine();
-
-        document.querySelector("#gradientList")?.appendChild(line);
-
+        getId("#gradientList").appendChild(line);
         event.emit("need_update");
+    });
+
+    ["gradientColor", "fontColor", "backColor", "strokeColor"].forEach((id) => {
+        getId(`#${id}2`)?.addEventListener("change", () => {
+            if (getId(`#${id}2`).value === getId(`#${id}`).value) return;
+            getId(`#${id}`).value = getId(`#${id}2`).value;
+            getId(`#${id}`).dispatchEvent(new CustomEvent("change"));
+        });
+        getId(`#${id}`)?.addEventListener("change", () => {
+            if (getId(`#${id}2`).value === getId(`#${id}`).value) return;
+            getId(`#${id}2`).value = getId(`#${id}`).value;
+            getId(`#${id}`).dispatchEvent(new CustomEvent("change"));
+        });
     });
 }

@@ -78,33 +78,44 @@
 
             <div class="form-group row">
                 <label class="col-sm-2 col-form-label">Background</label>
-                <div class="col-sm-10">
-                    <input class="form-control" type="color" id="backColor" value="#000000">
+                <div class="col-sm-10" style="display: flex;">
+                    <input class="form-control" type="color" id="backColor2" value="#000000" style="width: 10%;">
+                    <input class="form-control" type="text" id="backColor" value="#000000">
                 </div>
             </div>
 
             <div class="form-group row">
                 <label class="col-sm-2 col-form-label">Font Color</label>
-                <div class="col-sm-10">
-                    <input class="form-control" type="color" id="fontColor" value="#FFFFFF" name="fontColor">
+                <div class="col-sm-10" style="display: flex;">
+                    <input class="form-control" type="color" id="fontColor2" value="#FFFFFF" style="width: 10%;">
+                    <input class="form-control" type="text" id="fontColor" value="#FFFFFF">
                 </div>
             </div>
 
             <div class="form-group row" style="display: flex;justify-content: center;">
                 <label class="col-sm-2 col-form-label">Gradient (0/100)</label>
                 <div class="col-sm-10" style="display: flex;">
-                    <input class="form-control" type="color" id="gradientColor" value="#000000">
-                    <input class="form-control" type="number" id="gradientValue" value="0" min="0" max="100">
+                    <input type="color" id="gradientColor2" value="#000000" class="form-control" style="width: 10%;">
+                    <input class="form-control" type="text" id="gradientColor" value="#000000">
+                    <input class="form-control" type="number" id="gradientValue" value="0" min="0" max="100" style="width: 10%;">
                     <button id="gradientAdd" class="btn btn-primary">Add</button>
                 </div>
                 <div id="gradientList" class="gradientList">
                 </div>
             </div>
+
+            <div class="form-group row" style="display: flex;justify-content: center;">
+                <label class="col-sm-2 col-form-label">Gradient Angle (-360/360)</label>
+                <div class="col-sm-10" style="display: flex;">
+                    <input class="form-control" type="number" id="gradientAngle" value="0" min="-360" max="360">
+                </div>
+            </div>
             
             <div class="form-group row">
                 <label class="col-sm-2 col-form-label">Stroke Color</label>
-                <div class="col-sm-10">
-                    <input class="form-control" type="color" id="strokeColor" value="">
+                <div class="col-sm-10" style="display: flex;">
+                    <input type="color" id="strokeColor2" value="#000000" class="form-control" style="width: 10%;">
+                    <input class="form-control" type="text" id="strokeColor" value="#000000">
                 </div>
             </div>
 

@@ -232,16 +232,23 @@ export default class Main extends Phaser.Scene {
         getInput("#fontOffsetX").addEventListener("change", posOffsetChange);
         getInput("#fontOffsetY").addEventListener("change", posOffsetChange);
 
+        getInput("#gradientAngle").addEventListener("change", () => {
+            event.emit("need_update");
+        });
+
         event.on("need_update", () => {
             setTimeout(() => {
                 const gradientOpt = getGradients();
                 const fontColor = getInputValue("#fontColor");
+                const gradientAngle = parseInt(getInputValue("#gradientAngle"));
 
                 this.glyph.getChildren().forEach((obj) => {
                     const text = obj as Phaser.GameObjects.Text;
 
                     if (gradientOpt.length >= 2) {
-                        makeGradient(text, gradientOpt);
+                        text.setFill(
+                            makeGradient(text, gradientOpt, true, gradientAngle)
+                        );
                     } else {
                         text.setColor(fontColor);
                     }
@@ -284,6 +291,7 @@ export default class Main extends Phaser.Scene {
             fontOffsetX,
             fontOffsetY,
             fontColor,
+            gradientAngle,
         } = this.getInputs();
 
         const charArray = [...new Set(fontText.split("")).keys()];
@@ -302,7 +310,9 @@ export default class Main extends Phaser.Scene {
 
             const gradientOpt = getGradients();
             if (gradientOpt.length >= 2) {
-                makeGradient(obj, gradientOpt);
+                obj.setFill(
+                    makeGradient(obj, gradientOpt, true, gradientAngle)
+                );
             } else {
                 obj.setColor(fontColor);
             }
@@ -443,6 +453,7 @@ export default class Main extends Phaser.Scene {
             getInputValue("#fontScaleY").replace(",", ".")
         );
         const fontAngle = parseInt(getInputValue("#fontAngle"));
+        const gradientAngle = parseInt(getInputValue("#gradientAngle"));
 
         const fontOffsetX = parseInt(getInputValue("#fontOffsetX"));
         const fontOffsetY = parseInt(getInputValue("#fontOffsetY"));
@@ -482,6 +493,7 @@ export default class Main extends Phaser.Scene {
             paddingTop,
             paddingBottom,
             snapshotLayer,
+            gradientAngle,
         };
     }
 
@@ -504,6 +516,7 @@ export default class Main extends Phaser.Scene {
             paddingRight,
             paddingTop,
             paddingBottom,
+            gradientAngle,
         } = this.getInputs();
         const gradient = getGradients();
 
@@ -525,6 +538,7 @@ export default class Main extends Phaser.Scene {
             paddingRight,
             paddingTop,
             paddingBottom,
+            gradientAngle,
             gradient,
         });
     }
