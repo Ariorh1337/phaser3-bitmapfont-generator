@@ -48,6 +48,8 @@ export default class Main extends Phaser.Scene {
 
     private settings = {};
 
+    private dataJSON = [] as any;
+
     constructor() {
         super({
             key: "Main",
@@ -61,6 +63,7 @@ export default class Main extends Phaser.Scene {
     create() {
         const {
             refreshStatic,
+            snapshotLayer,
             prepareExports,
             loadPNG,
             loadXML,
@@ -69,11 +72,37 @@ export default class Main extends Phaser.Scene {
         } = this.getInputs();
 
         refreshStatic.addEventListener("click", () => {
+            this.dataJSON = [];
             this.loadFont(getInputValue("#fontFamilyName"));
             this.disableLoadButtons();
         });
 
+        snapshotLayer.addEventListener("click", () => {
+            this.saveToJSON();
+
+            this.glyph.getChildren().forEach((obj) => {
+                const text = obj as Phaser.GameObjects.Text;
+                const clone = this.add.text(
+                    text.x,
+                    text.y,
+                    text.text,
+                    text.style
+                );
+
+                clone.setAlpha(text.alpha);
+                clone.setScale(text.scaleX, text.scaleY);
+                clone.setAngle(text.angle);
+                clone.setOrigin(text.originX, text.originY);
+
+                this.container?.add(clone);
+                this.container?.bringToTop(text);
+            });
+
+            this.disableLoadButtons();
+        });
+
         prepareExports.addEventListener("click", () => {
+            this.saveToJSON();
             this.generateFont();
             this.enableLoadButtons();
         });
@@ -81,6 +110,14 @@ export default class Main extends Phaser.Scene {
         loadPNG.addEventListener("click", () => {
             if (!this.dataPNG || !this.filename) return;
             downloadLink(this.dataPNG, `${this.filename}.png`, "image/png");
+        });
+        getButton("#loadJSON").addEventListener("click", () => {
+            if (!this.dataJSON) return;
+            downloadBlob(
+                JSON.stringify(this.dataJSON),
+                `${this.filename}.json`,
+                "text/json"
+            );
         });
         loadXML.addEventListener("click", () => {
             if (!this.dataXML || !this.filename) return;
@@ -107,6 +144,18 @@ export default class Main extends Phaser.Scene {
             this.glyph.getChildren().forEach((obj) => {
                 const text = obj as Phaser.GameObjects.Text;
                 text.setColor(getInputValue("#fontColor"));
+            });
+            this.disableLoadButtons();
+        });
+
+        const strokeSize = getInput("#strokeSize");
+        strokeSize.addEventListener("change", () => {
+            this.glyph.getChildren().forEach((obj) => {
+                const text = obj as Phaser.GameObjects.Text;
+                text.setStroke(
+                    text.style.stroke,
+                    parseInt(getInputValue("#strokeSize"))
+                );
             });
             this.disableLoadButtons();
         });
@@ -162,9 +211,31 @@ export default class Main extends Phaser.Scene {
             this.disableLoadButtons();
         });
 
+        const posOffsetChange = () => {
+            const settings = this.settings as any;
+
+            const fontOffsetX = parseInt(getInputValue("#fontOffsetX"));
+            const fontOffsetY = parseInt(getInputValue("#fontOffsetY"));
+
+            Phaser.Actions.GridAlign(this.glyph.getChildren(), {
+                width: settings.gridWidth,
+                height: settings.gridHeight,
+                cellWidth: settings.maxWidth,
+                cellHeight: settings.maxHeight,
+                position: Phaser.Display.Align.CENTER,
+                x: settings.maxWidth / 2 + fontOffsetX,
+                y: settings.maxHeight / 2 + fontOffsetY,
+            });
+
+            this.disableLoadButtons();
+        };
+        getInput("#fontOffsetX").addEventListener("change", posOffsetChange);
+        getInput("#fontOffsetY").addEventListener("change", posOffsetChange);
+
         event.on("need_update", () => {
             setTimeout(() => {
                 const gradientOpt = getGradients();
+                const fontColor = getInputValue("#fontColor");
 
                 this.glyph.getChildren().forEach((obj) => {
                     const text = obj as Phaser.GameObjects.Text;
@@ -172,7 +243,7 @@ export default class Main extends Phaser.Scene {
                     if (gradientOpt.length >= 2) {
                         makeGradient(text, gradientOpt);
                     } else {
-                        text.setColor(getInputValue("#fontColor"));
+                        text.setColor(fontColor);
                     }
                 });
 
@@ -200,11 +271,20 @@ export default class Main extends Phaser.Scene {
 
     clearScene() {
         if (this.container) this.container.destroy();
+        this.dataJSON = [];
     }
 
     baseLayer() {
-        const { fontText, fontAlpha, fontScaleX, fontScaleY, fontAngle } =
-            this.getInputs();
+        const {
+            fontText,
+            fontAlpha,
+            fontScaleX,
+            fontScaleY,
+            fontAngle,
+            fontOffsetX,
+            fontOffsetY,
+            fontColor,
+        } = this.getInputs();
 
         const charArray = [...new Set(fontText.split("")).keys()];
 
@@ -223,6 +303,8 @@ export default class Main extends Phaser.Scene {
             const gradientOpt = getGradients();
             if (gradientOpt.length >= 2) {
                 makeGradient(obj, gradientOpt);
+            } else {
+                obj.setColor(fontColor);
             }
 
             widthArray.push(obj.width);
@@ -247,8 +329,8 @@ export default class Main extends Phaser.Scene {
             cellWidth: maxWidth,
             cellHeight: maxHeight,
             position: Phaser.Display.Align.CENTER,
-            x: maxWidth / 2,
-            y: maxHeight / 2,
+            x: maxWidth / 2 + fontOffsetX,
+            y: maxHeight / 2 + fontOffsetY,
         });
 
         const width = maxWidth * gridWidth;
@@ -258,7 +340,15 @@ export default class Main extends Phaser.Scene {
         this.container.height = height;
 
         this.scene.scene.scale.once("resize", () => {
+            this.settings["gridWidth"] = gridWidth;
+            this.settings["gridHeight"] = gridHeight;
+
+            this.settings["gameWidth"] = width;
+            this.settings["gameHeight"] = height;
+
+            this.settings["maxWidth"] = maxWidth;
             this.settings["maxHeight"] = maxHeight;
+
             this.settings["objArray"] = objArray.map((obj) => {
                 return {
                     text: obj.text,
@@ -303,14 +393,29 @@ export default class Main extends Phaser.Scene {
     }
 
     getFontStyle(): Phaser.Types.GameObjects.Text.TextStyle {
-        const { fontFamily, fontSize, fontColor, strokeSize, strokeColor } =
-            this.getInputs();
+        const {
+            fontFamily,
+            fontSize,
+            fontColor,
+            strokeSize,
+            strokeColor,
+            paddingLeft,
+            paddingRight,
+            paddingTop,
+            paddingBottom,
+        } = this.getInputs();
 
         const style = {
             fontFamily: fontFamily,
             fontSize: fontSize + "px",
             color: fontColor,
-        };
+            padding: {
+                left: paddingLeft,
+                right: paddingRight,
+                top: paddingTop,
+                bottom: paddingBottom,
+            },
+        } as Phaser.Types.GameObjects.Text.TextStyle;
 
         if (strokeSize) style["strokeThickness"] = strokeSize;
         if (strokeColor.length) style["stroke"] = strokeColor;
@@ -339,7 +444,16 @@ export default class Main extends Phaser.Scene {
         );
         const fontAngle = parseInt(getInputValue("#fontAngle"));
 
+        const fontOffsetX = parseInt(getInputValue("#fontOffsetX"));
+        const fontOffsetY = parseInt(getInputValue("#fontOffsetY"));
+
+        const paddingLeft = parseInt(getInputValue("#paddingLeft"));
+        const paddingRight = parseInt(getInputValue("#paddingRight"));
+        const paddingTop = parseInt(getInputValue("#paddingTop"));
+        const paddingBottom = parseInt(getInputValue("#paddingBottom"));
+
         const refreshStatic = getButton("#refreshStatic");
+        const snapshotLayer = getButton("#snapshotLayer");
         const prepareExports = getButton("#prepareExports");
         const loadPNG = getButton("#loadPNG");
         const loadXML = getButton("#loadXML");
@@ -357,29 +471,86 @@ export default class Main extends Phaser.Scene {
             fontScaleX,
             fontScaleY,
             fontAngle,
+            fontOffsetX,
+            fontOffsetY,
             refreshStatic,
             prepareExports,
             loadPNG,
             loadXML,
+            paddingLeft,
+            paddingRight,
+            paddingTop,
+            paddingBottom,
+            snapshotLayer,
         };
+    }
+
+    saveToJSON() {
+        const {
+            filename,
+            fontText,
+            fontFamily,
+            fontSize,
+            fontColor,
+            strokeSize,
+            strokeColor,
+            fontAlpha,
+            fontScaleX,
+            fontScaleY,
+            fontAngle,
+            fontOffsetX,
+            fontOffsetY,
+            paddingLeft,
+            paddingRight,
+            paddingTop,
+            paddingBottom,
+        } = this.getInputs();
+        const gradient = getGradients();
+
+        this.dataJSON.push({
+            filename: (filename as any).value,
+            fontText,
+            fontFamily,
+            fontSize,
+            fontColor,
+            strokeSize,
+            strokeColor,
+            fontAlpha,
+            fontScaleX,
+            fontScaleY,
+            fontAngle,
+            fontOffsetX,
+            fontOffsetY,
+            paddingLeft,
+            paddingRight,
+            paddingTop,
+            paddingBottom,
+            gradient,
+        });
     }
 
     enableLoadButtons() {
         const { loadPNG, loadXML } = this.getInputs();
+        const loadJSON = getButton("#loadJSON");
 
         loadPNG.classList.remove("btn-secondary");
         loadXML.classList.remove("btn-secondary");
+        loadJSON.classList.remove("btn-secondary");
         loadPNG.classList.add("btn-primary");
         loadXML.classList.add("btn-primary");
+        loadJSON.classList.add("btn-primary");
     }
 
     disableLoadButtons() {
         const { loadPNG, loadXML } = this.getInputs();
+        const loadJSON = getButton("#loadJSON");
 
         loadPNG.classList.remove("btn-primary");
         loadXML.classList.remove("btn-primary");
+        loadJSON.classList.remove("btn-primary");
         loadPNG.classList.add("btn-secondary");
         loadXML.classList.add("btn-secondary");
+        loadJSON.classList.add("btn-secondary");
 
         this.dataPNG = undefined;
         this.dataXML = undefined;

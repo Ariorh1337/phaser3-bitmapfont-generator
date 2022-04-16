@@ -46,9 +46,30 @@
             </div>
 
             <div class="form-group row">
-                <label class="col-sm-2 col-form-label">Stroke Size (0/100)</label>
+                <label class="col-sm-2 col-form-label">Padding Left (0/100)</label>
                 <div class="col-sm-10">
-                    <input class="form-control" type="number" min="0" step="1" max="100" value="0" id="strokeSize">
+                    <input class="form-control" type="number" min="0" step="1" max="100" value="0" id="paddingLeft">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Padding Right (0/100)</label>
+                <div class="col-sm-10">
+                    <input class="form-control" type="number" min="0" step="1" max="100" value="0" id="paddingRight">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Padding Top (0/100)</label>
+                <div class="col-sm-10">
+                    <input class="form-control" type="number" min="0" step="1" max="100" value="0" id="paddingTop">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Padding Bottom (0/100)</label>
+                <div class="col-sm-10">
+                    <input class="form-control" type="number" min="0" step="1" max="100" value="0" id="paddingBottom">
                 </div>
             </div>
         </fieldset>
@@ -70,7 +91,7 @@
             </div>
 
             <div class="form-group row" style="display: flex;justify-content: center;">
-                <label class="col-sm-2 col-form-label">Gradient</label>
+                <label class="col-sm-2 col-form-label">Gradient (0/100)</label>
                 <div class="col-sm-10" style="display: flex;">
                     <input class="form-control" type="color" id="gradientColor" value="#000000">
                     <input class="form-control" type="number" id="gradientValue" value="0" min="0" max="100">
@@ -84,6 +105,13 @@
                 <label class="col-sm-2 col-form-label">Stroke Color</label>
                 <div class="col-sm-10">
                     <input class="form-control" type="color" id="strokeColor" value="">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Stroke Size (0/100)</label>
+                <div class="col-sm-10">
+                    <input class="form-control" type="number" min="0" step="1" max="100" value="0" id="strokeSize">
                 </div>
             </div>
 
@@ -114,14 +142,30 @@
                     <input class="form-control" type="number" id="fontAngle" value="0" min="-360" step="1" max="360">
                 </div>
             </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">OffsetX (-100/100)</label>
+                <div class="col-sm-10">
+                    <input class="form-control" type="number" id="fontOffsetX" value="0" min="-100" step="1" max="100">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">OffsetY (-100/100)</label>
+                <div class="col-sm-10">
+                    <input class="form-control" type="number" id="fontOffsetY" value="0" min="-100" step="1" max="100">
+                </div>
+            </div>
         </fieldset>
         <fieldset id="download">
             <legend class="bg-light border-bottom">Actions</legend>
             <span class="form-group row" style="display: flex;align-items: center;justify-content: space-around;">
                 <button id="refreshStatic" class="btn btn-primary">Refresh Static</button>
+                <button id="snapshotLayer" class="btn btn-primary">Snapshot Layer</button>
                 <button id="prepareExports" class="btn btn-primary">Prepare Exports</button>
                 <button id="loadPNG" class="btn btn-secondary">Save PNG</button>
                 <button id="loadXML" class="btn btn-secondary">Save XML</button>
+                <button id="loadJSON" class="btn btn-secondary">Save JSON</button>
             </span>
         </fieldset>
         <fieldset id="result">
