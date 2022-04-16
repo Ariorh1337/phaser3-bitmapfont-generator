@@ -7,8 +7,7 @@
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 	<script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
 	<title><%= htmlWebpackPlugin.options.version %> | Bitmap Font Generator</title>
-	<base href="/">
-    <style src="./css/style.css"></style>
+    <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
     <div class="p-3" id="app">
@@ -40,16 +39,16 @@
             </div>
 
             <div class="form-group row">
-                <label class="col-sm-2 col-form-label">Font Size</label>
+                <label class="col-sm-2 col-form-label">Font Size (0/100)</label>
                 <div class="col-sm-10">
-                    <input class="form-control" type="number" min="16" step="1" max="40" value="30" id="fontSize" name="fontSize">
+                    <input class="form-control" type="number" min="16" step="1" max="100" value="30" id="fontSize" name="fontSize">
                 </div>
             </div>
 
             <div class="form-group row">
-                <label class="col-sm-2 col-form-label">Stroke Size</label>
+                <label class="col-sm-2 col-form-label">Stroke Size (0/100)</label>
                 <div class="col-sm-10">
-                    <input class="form-control" type="number" min="0" step="1" max="40" value="0" id="strokeSize">
+                    <input class="form-control" type="number" min="0" step="1" max="100" value="0" id="strokeSize">
                 </div>
             </div>
         </fieldset>
@@ -69,6 +68,17 @@
                     <input class="form-control" type="color" id="fontColor" value="#FFFFFF" name="fontColor">
                 </div>
             </div>
+
+            <div class="form-group row" style="display: flex;justify-content: center;">
+                <label class="col-sm-2 col-form-label">Gradient</label>
+                <div class="col-sm-10" style="display: flex;">
+                    <input class="form-control" type="color" id="gradientColor" value="#000000">
+                    <input class="form-control" type="number" id="gradientValue" value="0" min="0" max="100">
+                    <button id="gradientAdd" class="btn btn-primary">Add</button>
+                </div>
+                <div id="gradientList" class="gradientList">
+                </div>
+            </div>
             
             <div class="form-group row">
                 <label class="col-sm-2 col-form-label">Stroke Color</label>
@@ -78,28 +88,28 @@
             </div>
 
             <div class="form-group row">
-                <label class="col-sm-2 col-form-label">Alpha</label>
+                <label class="col-sm-2 col-form-label">Alpha (0/1)</label>
                 <div class="col-sm-10">
                     <input class="form-control" type="number" id="fontAlpha" value="1" min="0" step="0.1" max="1">
                 </div>
             </div>
 
             <div class="form-group row">
-                <label class="col-sm-2 col-form-label">ScaleX</label>
+                <label class="col-sm-2 col-form-label">ScaleX (-2/2)</label>
                 <div class="col-sm-10">
                     <input class="form-control" type="number" id="fontScaleX" value="1" min="-2" step="0.1" max="2">
                 </div>
             </div>
 
             <div class="form-group row">
-                <label class="col-sm-2 col-form-label">ScaleY</label>
+                <label class="col-sm-2 col-form-label">ScaleY (-2/2)</label>
                 <div class="col-sm-10">
                     <input class="form-control" type="number" id="fontScaleY" value="1" min="-2" step="0.1" max="2">
                 </div>
             </div>
 
             <div class="form-group row">
-                <label class="col-sm-2 col-form-label">Angle</label>
+                <label class="col-sm-2 col-form-label">Angle (-360/360)</label>
                 <div class="col-sm-10">
                     <input class="form-control" type="number" id="fontAngle" value="0" min="-360" step="1" max="360">
                 </div>
@@ -116,7 +126,7 @@
         </fieldset>
         <fieldset id="result">
             <legend class="bg-light border-bottom">Result Preview</legend>
-            <div id="phaser" style="background: repeat-x, repeat-y, url(/assets/bg.jpg);display: flex;justify-content: center;align-content: center;"></div>
+            <div id="phaser"></div>
         </fieldset>
     </div>
 </body>

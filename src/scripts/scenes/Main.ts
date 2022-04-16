@@ -4,7 +4,9 @@ import {
     createXML,
     downloadBlob,
     downloadLink,
+    makeGradient,
 } from "../util/extra";
+import { event } from "../util/globals";
 
 type InputElement = HTMLInputElement | HTMLTextAreaElement;
 const getInput = (id: string): InputElement => {
@@ -16,6 +18,25 @@ const getInputValue = (id: string): string => {
 const getButton = (id: string): HTMLButtonElement => {
     return document.querySelector(id)! as HTMLButtonElement;
 };
+
+function getGradients() {
+    const lines = document.querySelectorAll(".gradientLine");
+    const options = [] as any;
+
+    lines.forEach((line) => {
+        const color = line.getAttribute("data-color");
+        const percent = line.getAttribute("data-percent");
+
+        if (color && percent) {
+            options.push({
+                color,
+                percent: Number(percent),
+            });
+        }
+    });
+
+    return options;
+}
 
 export default class Main extends Phaser.Scene {
     private filename?: string;
@@ -85,7 +106,7 @@ export default class Main extends Phaser.Scene {
         fontColor.addEventListener("change", () => {
             this.glyph.getChildren().forEach((obj) => {
                 const text = obj as Phaser.GameObjects.Text;
-                text.setColor(fontColor.value);
+                text.setColor(getInputValue("#fontColor"));
             });
             this.disableLoadButtons();
         });
@@ -141,6 +162,24 @@ export default class Main extends Phaser.Scene {
             this.disableLoadButtons();
         });
 
+        event.on("need_update", () => {
+            setTimeout(() => {
+                const gradientOpt = getGradients();
+
+                this.glyph.getChildren().forEach((obj) => {
+                    const text = obj as Phaser.GameObjects.Text;
+
+                    if (gradientOpt.length >= 2) {
+                        makeGradient(text, gradientOpt);
+                    } else {
+                        text.setColor(getInputValue("#fontColor"));
+                    }
+                });
+
+                this.disableLoadButtons();
+            }, 100);
+        });
+
         this.loadFont(getInputValue("#fontFamilyName"));
     }
 
@@ -180,6 +219,11 @@ export default class Main extends Phaser.Scene {
             obj.setAlpha(fontAlpha);
             obj.setScale(fontScaleX, fontScaleY);
             obj.setAngle(fontAngle);
+
+            const gradientOpt = getGradients();
+            if (gradientOpt.length >= 2) {
+                makeGradient(obj, gradientOpt);
+            }
 
             widthArray.push(obj.width);
             heightArray.push(obj.height);

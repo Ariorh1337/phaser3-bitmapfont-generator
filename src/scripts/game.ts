@@ -1,5 +1,6 @@
 import "phaser";
 import Main from "./scenes/Main";
+import { event } from "./util/globals";
 
 const config = {
     width: 512,
@@ -21,5 +22,54 @@ const config = {
 };
 
 window.addEventListener("load", () => {
+    gradientUI();
+
     new Phaser.Game(config);
 });
+
+function gradientUI() {
+    function createLine() {
+        const color_value = (document.querySelector("#gradientColor") as any)
+            .value;
+        const percent_value = (document.querySelector("#gradientValue") as any)
+            .value;
+
+        const line = document.createElement("div");
+
+        line.classList.add("gradientLine");
+
+        line.setAttribute("name", "gradientLine");
+        line.setAttribute("data-color", color_value);
+        line.setAttribute("data-percent", percent_value);
+
+        const color = document.createElement("span");
+        color.textContent = color_value;
+        color.style.borderLeft = `20px solid ${color_value}`;
+
+        const percent = document.createElement("span");
+        percent.textContent = percent_value;
+
+        const remove = document.createElement("button");
+        remove.textContent = "x";
+        remove.classList.add("btn");
+        remove.classList.add("btn-primary");
+        remove.onclick = () => {
+            event.emit("need_update");
+            line.remove();
+        };
+
+        line.appendChild(color);
+        line.appendChild(percent);
+        line.appendChild(remove);
+
+        return line;
+    }
+
+    document.querySelector("#gradientAdd")?.addEventListener("click", () => {
+        const line = createLine();
+
+        document.querySelector("#gradientList")?.appendChild(line);
+
+        event.emit("need_update");
+    });
+}

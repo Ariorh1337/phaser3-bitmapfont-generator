@@ -20,4 +20,22 @@ body {
 
 #phaser {
     outline: 1px solid black;
+    background: repeat-x, repeat-y, url(/assets/bg.jpg);
+    display: flex;
+    justify-content: center;
+    align-content: center;
+}
+
+.gradientList {
+    display: flex;
+    margin-top: 9px;
+    flex-direction: column;
+    min-width: 35%;
+}
+
+.gradientLine {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    max-width: 83.333333%;
 }
