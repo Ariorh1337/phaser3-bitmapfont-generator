@@ -12,57 +12,111 @@
 </head>
 <body>
     <div class="p-3" id="app">
+        <fieldset id="main">
+            <legend class="bg-light border-bottom">Static Options</legend>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Result file name</label>
+                <div class="col-sm-10">
+                    <input class="form-control" type="text" id="filename" value="font">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Symbols</label>
+                <div class="col-sm-10">
+                    <input class="form-control" type="text" id="fontText" value=" !#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~" name="fontFamily">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">
+                    <a href="https://fonts.google.com/" target="blank">Font Family</a>
+                </label>
+                <div class="col-sm-10" style="display: flex;">
+                    <input class="form-control" type="text" id="fontFamilyName" value="Bebas Neue" style="width: 100%; height: 100%;">
+                    <input class="form-control" type="file" id="fontFamilyFile" value="" style="width: 60%;height: fit-content; display: none;">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Font Size</label>
+                <div class="col-sm-10">
+                    <input class="form-control" type="number" min="16" step="1" max="40" value="30" id="fontSize" name="fontSize">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Stroke Size</label>
+                <div class="col-sm-10">
+                    <input class="form-control" type="number" min="0" step="1" max="40" value="0" id="strokeSize">
+                </div>
+            </div>
+        </fieldset>
         <fieldset id="options">
-                <legend class="bg-light border-bottom">Create Bitmap Font</legend>
-                <div class="form-group row">
-                    <label class="col-sm-2 col-form-label">Text</label>
-                    <div class="col-sm-10">
-                        <input class="form-control" type="text" id="fontText" value=" !#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~" name="fontFamily">
-                    </div>
+            <legend class="bg-light border-bottom">Dynamic Options</legend>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Background</label>
+                <div class="col-sm-10">
+                    <input class="form-control" type="color" id="backColor" value="#000000">
                 </div>
-                <div class="form-group row">
-                    <label class="col-sm-2 col-form-label">Font Family</label>
-                    <div class="col-sm-10" style="display: flex;">
-                        <input class="form-control" type="text" id="fontFamilyName" value="Bebas Neue" style="width: 100%; height: 100%;">
-                        <input class="form-control" type="file" id="fontFamilyFile" value="" style="width: 60%;height: fit-content; display: none;">
-                    </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Font Color</label>
+                <div class="col-sm-10">
+                    <input class="form-control" type="color" id="fontColor" value="#FFFFFF" name="fontColor">
                 </div>
-                <div class="form-group row">
-                    <label class="col-sm-2 col-form-label">Font Size</label>
-                    <div class="col-sm-10">
-                        <input class="form-control" type="number" min="16" step="1" max="40" value="30" id="fontSize" name="fontSize">
-                    </div>
+            </div>
+            
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Stroke Color</label>
+                <div class="col-sm-10">
+                    <input class="form-control" type="color" id="strokeColor" value="">
                 </div>
-                <div class="form-group row">
-                    <label class="col-sm-2 col-form-label">Font Color</label>
-                    <div class="col-sm-10">
-                        <input class="form-control" type="color" id="fontColor" value="#FFFFFF" name="fontColor">
-                    </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Alpha</label>
+                <div class="col-sm-10">
+                    <input class="form-control" type="number" id="fontAlpha" value="1" min="0" step="0.1" max="1">
                 </div>
-                <div class="form-group row">
-                    <label class="col-sm-2 col-form-label">Stroke Size</label>
-                    <div class="col-sm-10">
-                        <input class="form-control" type="number" min="0" step="1" max="40" value="0" id="strokeSize">
-                    </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">ScaleX</label>
+                <div class="col-sm-10">
+                    <input class="form-control" type="number" id="fontScaleX" value="1" min="-2" step="0.1" max="2">
                 </div>
-                <div class="form-group row">
-                    <label class="col-sm-2 col-form-label">Stroke Color</label>
-                    <div class="col-sm-10">
-                        <input class="form-control" type="color" id="strokeColor" value="">
-                    </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">ScaleY</label>
+                <div class="col-sm-10">
+                    <input class="form-control" type="number" id="fontScaleY" value="1" min="-2" step="0.1" max="2">
                 </div>
-                <button class="btn btn-primary" type="button" id="generate">Generate Font</button>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Angle</label>
+                <div class="col-sm-10">
+                    <input class="form-control" type="number" id="fontAngle" value="0" min="-360" step="1" max="360">
+                </div>
+            </div>
+        </fieldset>
+        <fieldset id="download">
+            <legend class="bg-light border-bottom">Actions</legend>
+            <span class="form-group row" style="display: flex;align-items: center;justify-content: space-around;">
+                <button id="refreshStatic" class="btn btn-primary">Refresh Static</button>
+                <button id="prepareExports" class="btn btn-primary">Prepare Exports</button>
+                <button id="loadPNG" class="btn btn-secondary">Save PNG</button>
+                <button id="loadXML" class="btn btn-secondary">Save XML</button>
+            </span>
         </fieldset>
         <fieldset id="result">
             <legend class="bg-light border-bottom">Result Preview</legend>
-            <div id="phaser" style="background: repeat-x, repeat-y, url(/assets/bg.jpg)"></div>
-        </fieldset>
-        <fieldset id="download">
-            <legend class="bg-light border-bottom">Download</legend>
-            <div>
-                <button id="loadPNG" class="btn btn-secondary">PNG</button>
-                <button id="loadXML" class="btn btn-secondary">XML</button>
-            </div>
+            <div id="phaser" style="background: repeat-x, repeat-y, url(/assets/bg.jpg);display: flex;justify-content: center;align-content: center;"></div>
         </fieldset>
     </div>
 </body>

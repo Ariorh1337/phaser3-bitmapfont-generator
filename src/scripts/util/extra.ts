@@ -102,7 +102,15 @@ export function createTexture(
 
 export function createXML(data: {
     filename: string;
-    objArray: Phaser.GameObjects.Text[];
+    objArray: [
+        {
+            text: string;
+            x: number;
+            y: number;
+            width: number;
+            height: number;
+        }
+    ];
     maxHeight: number;
     fontFamily: string;
     fontSize: number;
